@@ -47,9 +47,9 @@ export default function App() {
             <Route path="/product/:id" element={<ProductDetailPage addToCart={addToCart} />} />
             <Route path="/cart" element={<CartPage cart={cart} removeFromCart={removeFromCart} clearCart={clearCart} />} />
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/brands" element={<BrandsPage />} />
-            <Route path="/deals" element={<DealsPage />} />
+            <Route path="/about" element={<AboutPage addToCart={addToCart} />} />
+            <Route path="/brands" element={<BrandsPage addToCart={addToCart} />} />
+            <Route path="/deals" element={<DealsPage addToCart={addToCart} />} />
           </Routes>
         </main>
         <Footer />
