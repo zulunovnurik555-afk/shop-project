@@ -1,33 +1,54 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2, ShoppingBag, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function CartPage({ cart, removeFromCart, clearCart }) {
-  // Инициализируем телефон с дефолтным префиксом или пустым значением
   const [formData, setFormData] = useState({ name: '', phone: '+996', address: '' });
+  const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Обработчик ввода телефона: гарантируем, что +996 всегда на месте
   const handlePhoneChange = (e) => {
     let value = e.target.value;
-    // Если пользователь пытается удалить +996, оставляем его
     if (!value.startsWith('+996')) {
       value = '+996';
     }
     setFormData({ ...formData, phone: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Проверяем, что введен не только префикс, но и цифры номера
+
     if (!formData.name || formData.phone.length <= 4 || !formData.address) {
-      alert('Пожалуйста, заполните все поля формы и укажите корректный номер телефона!');
+      alert('Пожалуйста, заполните все поля и укажите корректный номер телефона!');
       return;
     }
-    setIsSubmitted(true);
-    clearCart();
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.from('orders').insert([
+        {
+          name: formData.name,
+          phone: formData.phone,
+          address: formData.address,
+          total_price: totalPrice,
+          items: cart, 
+        },
+      ]);
+
+      if (error) throw error;
+
+      setIsSubmitted(true);
+      clearCart();
+    } catch (err) {
+      console.error('Ошибка при сохранении заказа:', err.message);
+      alert('Не удалось оформить заказ. Попробуйте еще раз.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (isSubmitted) {
@@ -38,7 +59,7 @@ export default function CartPage({ cart, removeFromCart, clearCart }) {
         </div>
         <h2 className="text-3xl font-bold text-gray-900">Заказ успешно оформлен!</h2>
         <p className="text-gray-600">
-          Спасибо за покупку, <span className="font-semibold text-gray-900">{formData.name}</span>! Мы свяжемся с вами в ближайшее время по номеру <span className="font-semibold text-gray-900">{formData.phone}</span>.
+          Спасибо за покупку, <span className="font-semibold text-gray-900">{formData.name}</span>! Мы сохранили ваш заказ в базу данных и скоро свяжемся с вами по номеру <span className="font-semibold text-gray-900">{formData.phone}</span>.
         </p>
         <Link
           to="/catalog"
@@ -75,7 +96,6 @@ export default function CartPage({ cart, removeFromCart, clearCart }) {
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Оформление заказа</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Список товаров */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Ваш заказ</h2>
           {cart.map((item) => (
@@ -101,7 +121,6 @@ export default function CartPage({ cart, removeFromCart, clearCart }) {
           ))}
         </div>
 
-        {/* Форма и итоги */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-6">
           <h3 className="text-xl font-bold text-gray-800">Детали доставки</h3>
           
@@ -155,9 +174,10 @@ export default function CartPage({ cart, removeFromCart, clearCart }) {
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-medium hover:bg-indigo-700 transition shadow-lg flex items-center justify-center space-x-2"
+              disabled={loading}
+              className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-medium hover:bg-indigo-700 transition shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50"
             >
-              <span>Подтвердить заказ</span>
+              <span>{loading ? 'Отправка...' : 'Подтвердить заказ'}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </form>
