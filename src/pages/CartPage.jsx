@@ -3,15 +3,27 @@ import { Link } from 'react-router-dom';
 import { Trash2, ShoppingBag, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function CartPage({ cart, removeFromCart, clearCart }) {
-  const [formData, setFormData] = useState({ name: '', phone: '', address: '' });
+  // Инициализируем телефон с дефолтным префиксом или пустым значением
+  const [formData, setFormData] = useState({ name: '', phone: '+996', address: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  // Обработчик ввода телефона: гарантируем, что +996 всегда на месте
+  const handlePhoneChange = (e) => {
+    let value = e.target.value;
+    // Если пользователь пытается удалить +996, оставляем его
+    if (!value.startsWith('+996')) {
+      value = '+996';
+    }
+    setFormData({ ...formData, phone: value });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.address) {
-      alert('Пожалуйста, заполните все поля формы!');
+    // Проверяем, что введен не только префикс, но и цифры номера
+    if (!formData.name || formData.phone.length <= 4 || !formData.address) {
+      alert('Пожалуйста, заполните все поля формы и укажите корректный номер телефона!');
       return;
     }
     setIsSubmitted(true);
@@ -105,17 +117,19 @@ export default function CartPage({ cart, removeFromCart, clearCart }) {
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-600 transition"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
               <input
                 type="tel"
                 required
-                placeholder="+996 (XXX) XX-XX-XX"
+                placeholder="+996 555 123 456"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-600 transition"
+                onChange={handlePhoneChange}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-600 transition font-mono"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Адрес доставки</label>
               <textarea
