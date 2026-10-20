@@ -33,14 +33,12 @@ export default function AdminPage() {
     }
   };
 
-  // Выход из админки
   const handleLogout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem('isAdminAuth');
     setPassword('');
   };
 
-  // Добавление товара в Supabase
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -70,7 +68,6 @@ export default function AdminPage() {
     }
   };
 
-  // 🔒 ЕСЛИ НЕ АВТОРИЗОВАН — ПОКАЗЫВАЕМ ОКНО ВХОДА
   if (!isAuthenticated) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center px-4 py-12 bg-gray-50">
@@ -111,19 +108,15 @@ export default function AdminPage() {
             </button>
           </form>
 
-          <div className="text-center text-xs text-gray-400">
-            Подсказка для теста: пароль <span className="font-bold text-gray-600">admin123</span>
-          </div>
+
         </div>
       </div>
     );
   }
 
-  // 🔓 ЕСЛИ АВТОРИЗОВАН — ПОКАЗЫВАЕМ ПАНЕЛЬ УПРАВЛЕНИЯ
   return (
     <div className="container mx-auto px-4 py-10 max-w-4xl space-y-8">
       
-      {/* Верхняя панель админа */}
       <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center space-x-3">
           <div className="bg-emerald-50 text-emerald-600 p-3 rounded-2xl">
@@ -143,7 +136,6 @@ export default function AdminPage() {
         </button>
       </div>
 
-      {/* Форма добавления нового товара */}
       <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6">
         <div className="flex items-center space-x-2 border-b border-gray-100 pb-4">
           <Plus className="w-5 h-5 text-indigo-600" />
